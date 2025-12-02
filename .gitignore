@@ -3,3 +3,6 @@ __pycache__/
 data/
 *.pth
 .vscode/
+saved_weights/
+*.png
+ideas.txt

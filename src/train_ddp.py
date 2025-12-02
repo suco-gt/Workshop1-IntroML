@@ -34,7 +34,6 @@ def setup_ddp():
     # Get rank information from environment variables
     # if we have just 1 node, then rank and local rank should be the same
     rank = dist.get_rank()  # Global process ID (0 to world_size-1)
-    local_rank = int(os.environ["LOCAL_RANK"])  # GPU ID on this node
     world_size = dist.get_world_size()  # Total number of processes
     
     return rank, local_rank, world_size

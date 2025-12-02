@@ -25,7 +25,7 @@ class CIFARNet(nn.Module):
         # it is used to reduce the size of images for faster processing without missing key details
         self.pool = nn.MaxPool2d(2, 2)
 
-        # Batch norm normalizes an entire input to the layer of a neural network to keep all activations resonable
+        # Batch norm normalizes an entire input to the layer of a neural network to keep all activations reasonable
         # we batch normalize for each convolution layer
         self.bn1 = nn.BatchNorm2d(64)
         self.bn2 = nn.BatchNorm2d(128)
@@ -137,3 +137,47 @@ class StagedCIFARNet(nn.Module):
         x = self.stage2(x)
         x = self.stage3(x)
         return x
+
+
+def main():
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
+    
+    fig, ax = plt.subplots(figsize=(18, 6))
+    ax.set_xlim(-0.5, 16.5)
+    ax.set_ylim(0, 10)
+    ax.axis('off')
+    
+    layers = [
+        ("Input\n3×32×32", 1, 5),
+        ("Conv+Pool\n+BN+ReLU\n64×16×16", 2.8, 5),
+        ("Conv+Pool\n+BN+ReLU\n128×8×8", 4.6, 5),
+        ("Conv+BN\n+ReLU\n256×8×8", 6.4, 5),
+        ("Conv+BN\n+ReLU\n512×8×8", 8.2, 5),
+        ("Flatten\n32768", 10, 5),
+        ("FC+ReLU\n+Dropout\n512", 11.8, 5),
+        ("FC+ReLU\n+Dropout\n256", 13.6, 5),
+        ("FC\n(Output)\n10 classes", 15.4, 5)
+    ]
+    
+    for i, (label, x, y) in enumerate(layers):
+        box = FancyBboxPatch((x-0.6, y-0.8), 1.2, 1.6, 
+                             boxstyle="round,pad=0.05", 
+                             edgecolor='black', facecolor='lightblue', linewidth=2)
+        ax.add_patch(box)
+        ax.text(x, y, label, ha='center', va='center', fontsize=10, weight='bold')
+        
+        if i < len(layers) - 1:
+            arrow = FancyArrowPatch((x+0.6, y), (layers[i+1][1]-0.6, layers[i+1][2]),
+                                   arrowstyle='->', mutation_scale=20, linewidth=2, color='black')
+            ax.add_patch(arrow)
+    
+    plt.title('CIFARNet Architecture', fontsize=18, weight='bold', pad=20)
+    plt.tight_layout()
+    plt.savefig('cifar_net_simple.png', dpi=300, bbox_inches='tight', facecolor='white')
+    print("Simple visualization saved as cifar_net_simple.png")
+
+
+if __name__ == "__main__":
+    main()
+
