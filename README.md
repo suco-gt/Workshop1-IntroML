@@ -82,6 +82,16 @@ model.load_state_dict(torch.load('model.pth'))
 
 ---
 
+## Running the model locally
+```
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python train.py
+```
+
+--
+
 ## Getting Started with ICE
 
 ### Connecting to PACE
@@ -106,7 +116,7 @@ nvidia-smi
 ### Option 1: Using rsync
 ```bash
 # Transfer project to PACE
-rsync -avz --progress --exclude-from='.rsyncignore' \
+rsync -avz --progress --exclude-from='./Workshop1-IntroMl/.rsyncignore' \
   Workshop1-IntroML/ \
   YOUR_USERNAME@login-ice.pace.gatech.edu:~/Workshop1-IntroML/
 
@@ -140,39 +150,14 @@ git clone YOUR_REPO_URL
 
 ---
 
-## Setting Up Your Environment
-
-### View Available Modules
-```bash
-module avail  # List all available software modules
-```
-
-### Create Conda Environment
-```bash
-# Load Anaconda - all relevant python interpreters + pip
-module load anaconda3
-
-# Create new environment
-conda create -n ml_workshop
-
-# Activate environment
-conda activate ml_workshop
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Deactivate when done
-conda deactivate
-```
-
----
-
 ## Running Jobs on PACE
 
 ### Interactive Sessions
 For testing and debugging:
 
 ```bash
+# --gres=gpu:<gpu-type>:<gpu-count>
+
 # Single GPU session
 salloc --gres=gpu:1 --ntasks-per-node=1 --cpus-per-task=4 --mem=32G --time=3:00:00
 
@@ -232,6 +217,23 @@ tail -f train_JOBID.out
 
 For more details: [PACE Job Monitoring Guide](https://gatech.service-now.com/home?id=kb_article_view&sysparm_article=KB0042096) -->
 
+---
+
+## Setting Up Your Environment
+
+### View Available Modules
+```bash
+module avail  # List all available software modules
+```
+
+### Load Python
+```bash
+# Load Anaconda - all relevant python interpreters + pip
+module load anaconda3
+
+# Install dependencies
+pip install -r requirements.txt
+```
 ---
 
 ## Training Your Model
@@ -332,10 +334,6 @@ train_sampler.set_epoch(epoch)
 # Request 4 GPUs
 salloc --gres=gpu:4 --ntasks-per-node=4 --cpus-per-task=4 --mem=32G --time=3:00:00
 
-# Load environment
-module load anaconda3
-conda activate ml_workshop
-
 # Run with torch distributed launcher
 python -m torch.distributed.run --nproc_per_node=4 train_ddp.py
 ```
@@ -423,7 +421,6 @@ salloc --gres=gpu:3 --ntasks-per-node=3 --cpus-per-task=4 --mem=32G --time=3:00:
 
 # Load environment
 module load anaconda3
-conda activate ml_workshop
 
 # Run with 3 processes (one per stage)
 python -m torch.distributed.run --nproc_per_node=3 train_pipeline.py
