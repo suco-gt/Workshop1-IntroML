@@ -41,6 +41,7 @@ rsync -avz --progress --exclude-from='Workshop1-IntroML/.rsyncignore' Workshop1-
 
 get weights file off
 rsync -avz --progress zbuchholz3@login-ice.pace.gatech.edu:~/Workshop1-IntroML/src/cifar_model.pth ./Workshop1-IntroML/src/
+rsync -avz --progress "zbuchholz3@login-ice.pace.gatech.edu:~/Workshop1-IntroML/src/cifar_cnn.pth.stage*.pth" ./Workshop1-IntroML/src/
 
 module avail - see all available modules
 module load anaconda3
@@ -56,6 +57,7 @@ gpu type is optional you will just be give the first gpu
 salloc -greswhatever --ntasks-per-node=1
 salloc --gres=gpu:1 --ntasks-per-node=1 --cpus-per-task=4 --mem=32G --time=3:00:00
 salloc --gres=gpu:4 --ntasks-per-node=4 --cpus-per-task=4 --mem=32G --time=3:00:00
+salloc --gres=gpu:3 --ntasks-per-node=3 --cpus-per-task=4 --mem=32G --time=3:00:00
 
 see info about the nodes and how many cpus/gpus they have
 sinfo -o "%20N %10c %10m %25f %10G"
@@ -65,7 +67,7 @@ nvidia-smi to see info about gpu
 local rank gpu id on current node
 
 python -m torch.distributed.run --nproc_per_node=4 train_ddp.py
-
+python -m torch.distributed.run --nproc_per_node=3 train_pipeline.py
 
 slide outline
 

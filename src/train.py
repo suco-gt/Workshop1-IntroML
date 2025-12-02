@@ -8,7 +8,7 @@ import time
 from constants import LEARNING_RATE, MOMENTUM, WEIGHT_DECAY, EPOCHS, MODEL_WEIGHTS_PATH
 from check_device import get_device
 from data_loader import cifar10_loaders
-from models import BasicCIFARNet
+from models import CIFARNet
 
 
 def main():
@@ -19,7 +19,7 @@ def main():
     train_loader, test_loader = cifar10_loaders()
 
     # create our model and put it on whatever device we are using, cpu, gpu etc
-    model = BasicCIFARNet().to(device)
+    model = CIFARNet().to(device)
     # Cross entropy loss is typically used for classification since it effectively computes the difference between 2 probabilities
     loss_function = nn.CrossEntropyLoss()
     # the optimizer is how we take our steps to adjust the weights

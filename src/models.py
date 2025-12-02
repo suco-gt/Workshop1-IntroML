@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 # all networks must extend the nn.Module
-class BasicCIFARNet(nn.Module):
+class CIFARNet(nn.Module):
     def __init__(self):
         super().__init__()
         # networks must define a constructor to create all of the layers that the network will use
@@ -94,4 +94,46 @@ class BasicCIFARNet(nn.Module):
         # pass through last fc layer but do not relu because we will softmax later to get probabilities for each class
         x = self.fc3(x) # (B, 10) final size of output
 
+        return x
+    
+
+class StagedCIFARNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        
+        self.stage1 = nn.Sequential(
+            nn.Conv2d(3, 64, kernel_size=3, padding=1),
+            nn.MaxPool2d(2, 2),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.MaxPool2d(2, 2),
+            nn.BatchNorm2d(128),
+            nn.ReLU()
+        )
+
+        self.stage2 = nn.Sequential(
+            nn.Conv2d(128, 256, kernel_size=3, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+            nn.Conv2d(256, 512, kernel_size=3, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU(),
+            nn.Flatten(1)
+        )
+        
+        self.stage3 = nn.Sequential(
+            nn.Linear(512 * 8 * 8, 512),
+            nn.ReLU(),
+            nn.Dropout(p=0.5),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.Dropout(p=0.5),
+            nn.Linear(256, 10)
+        )
+
+    def forward(self, x):
+        x = self.stage1(x)
+        x = self.stage2(x)
+        x = self.stage3(x)
         return x

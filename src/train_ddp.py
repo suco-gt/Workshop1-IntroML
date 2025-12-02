@@ -11,22 +11,10 @@ import os
 
 from constants import LEARNING_RATE, MOMENTUM, WEIGHT_DECAY, EPOCHS, MODEL_WEIGHTS_PATH
 from data_loader import cifar10_loaders_ddp
-from models import BasicCIFARNet
+from models import CIFARNet
 
 
 def setup_ddp():
-    """
-    Initialize the distributed environment.
-    
-    This function sets up the process group for distributed training.
-    It uses environment variables that are typically set by the job scheduler
-    or torch.distributed.launch utility.
-    
-    Returns:
-        rank (int): Global rank of this process
-        local_rank (int): Local rank on this node (which GPU to use)
-        world_size (int): Total number of processes
-    """
     # get what gpu this process is currently running with
     # local rank env variable is set by the torch runner
     local_rank = int(os.environ.get("LOCAL_RANK", 0))
@@ -53,10 +41,6 @@ def setup_ddp():
 
 
 def cleanup_ddp():
-    """
-    Clean up the distributed environment.
-    Should be called at the end of training.
-    """
     dist.destroy_process_group()
 
 
@@ -78,7 +62,7 @@ def main():
     train_loader, test_loader = cifar10_loaders_ddp(world_size, rank)
 
     # Create model and move it to the correct GPU
-    model = BasicCIFARNet().to(device)
+    model = CIFARNet().to(device)
 
     # Wrap model with DDP
     # This handles gradient synchronization across processes

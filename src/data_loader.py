@@ -1,6 +1,7 @@
 # data_loader.py
+import torch
 from torchvision import datasets, transforms
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, RandomSampler
 from torch.utils.data.distributed import DistributedSampler
 import torch.distributed as dist
 
@@ -141,3 +142,40 @@ def cifar10_loaders_ddp(world_size, rank, batch_size=BATCH_SIZE):
     )
     
     return train_loader, test_loader
+
+
+def cifar10_loaders_pipeline(world_size, rank, batch_size=BATCH_SIZE, shuffle_seed=42):
+    # Middle ranks don't need data loaders
+    if rank != 0 and rank != world_size - 1:
+        return None, None
+    
+    transform_train, transform_test = get_cifar_data_transforms()
+    train_set, test_set = get_cifar_data_sets(transform_train, transform_test)
+    
+    # Create generator with fixed seed for reproducible shuffling
+    generator = torch.Generator()
+    generator.manual_seed(shuffle_seed)
+    
+    # Create DataLoaders with RandomSampler using the same seed
+    # This ensures rank 0 and last rank get the same batches in the same order
+    train_loader = DataLoader(
+        train_set,
+        batch_size=batch_size,
+        shuffle=False,
+        sampler=RandomSampler(train_set, generator=generator),
+        pin_memory=True,
+        num_workers=4,
+        drop_last=True  # Drop last incomplete batch for consistent pipeline stages
+    )
+    
+    test_loader = DataLoader(
+        test_set,
+        batch_size=batch_size,
+        shuffle=False,
+        pin_memory=True,
+        num_workers=4,
+        drop_last=True
+    )
+    
+    return train_loader, test_loader
+
